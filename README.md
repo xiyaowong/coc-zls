@@ -21,7 +21,7 @@ Please trigger completion in coc-settings.json
 
 ## Snippets
 
-Snippets are improved from `[Metalymph/zig-snippets](https://github.com/Metalymph/zig-snippets)`
+Snippets are improved from [`Metalymph/zig-snippets`](https://github.com/Metalymph/zig-snippets)
 
 You need to install `coc-snippets`
 
