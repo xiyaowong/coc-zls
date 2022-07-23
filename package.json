@@ -28,14 +28,19 @@
     "semi": true
   },
   "devDependencies": {
+    "@types/mkdirp": "^1.0.2",
     "@types/node": "^16.4.10",
+    "@types/node-fetch": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^4.8.2",
     "@typescript-eslint/parser": "^4.8.2",
-    "coc.nvim": "^0.0.80",
+    "coc.nvim": "^0.0.81",
     "esbuild": "^0.8.42",
     "eslint": "^7.14.0",
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-prettier": "^3.1.4",
+    "https-proxy-agent": "^5.0.1",
+    "mkdirp": "^1.0.4",
+    "node-fetch": "^2.6.1",
     "prettier": "^2.2.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.1.2"
@@ -44,37 +49,144 @@
     "onLanguage:zig"
   ],
   "contributes": {
-    "configuration": {
-      "type": "object",
-      "title": "coc-zls configuration",
-      "properties": {
-        "zls.serverPath": {
-          "type": "string",
-          "default": "zls",
-          "description": "Path to zls"
-        },
-        "zls.debugLog": {
-          "type": "boolean",
-          "default": false,
-          "description": "Enable debug logging"
-        }
-      }
-    },
     "commands": [
       {
+        "command": "zls.install",
+        "title": "Install Server",
+        "category": "Zig Language Server"
+      },
+      {
         "command": "zls.start",
-        "title": "Start Zig Language Server",
+        "title": "Start Server",
         "category": "Zig Language Server"
       },
       {
         "command": "zls.stop",
-        "title": "Stop Zig Language Server",
+        "title": "Stop Server",
         "category": "Zig Language Server"
       },
       {
         "command": "zls.restart",
-        "title": "Restart Zig Language Server",
+        "title": "Restart Server",
         "category": "Zig Language Server"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Zig Language Server",
+      "properties": {
+        "zls.trace.server": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        },
+        "zls.path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to `zls` executable. Example: `C:/zls/zig-cache/bin/zls.exe`.",
+          "format": "path"
+        },
+        "zls.debugLog": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Enable debug logging in release builds of zls."
+        },
+        "zls.enable_snippets": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to enable snippet completions",
+          "default": false
+        },
+        "zls.enable_unused_variable_warnings": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to enable unused variable warnings",
+          "default": false
+        },
+        "zls.enable_import_embedfile_argument_completions": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to enable import/embedFile argument completions (NOTE: these are triggered manually as updating the autotrigger characters may cause issues)",
+          "default": false
+        },
+        "zls.zig_lib_path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Zig library path",
+          "default": null
+        },
+        "zls.zig_exe_path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Zig executable path used to run the custom build runner. May be used to find a lib path if none is provided.",
+          "default": null
+        },
+        "zls.warn_style": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to pay attention to style issues. This is opt-in since the style guide explicitly states that the style info provided is a guideline only.",
+          "default": false
+        },
+        "zls.build_runner_path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to the build_runner.zig file.",
+          "default": null
+        },
+        "zls.build_runner_cache_path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to a directory that will be used as cache when `zig run`ning the build runner",
+          "default": null
+        },
+        "zls.enable_semantic_tokens": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Semantic token support",
+          "default": true
+        },
+        "zls.operator_completions": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to enable `*` and `?` operators in completion lists",
+          "default": true
+        },
+        "zls.include_at_in_builtins": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether the @ sign should be part of the completion of builtins",
+          "default": false
+        },
+        "zls.max_detail_length": {
+          "scope": "resource",
+          "type": "integer",
+          "description": "The detail field of completions is truncated to be no longer than this (in bytes).",
+          "default": 1048576
+        },
+        "zls.skip_std_references": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Skips references to std. This will improve lookup speeds. Going to definition however will continue to work",
+          "default": false
+        },
+        "zls.builtin_path": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to \"builtin;\" useful for debugging, automatically set if let null",
+          "default": null
+        }
+      }
+    },
+    "snippets": [
+      {
+        "language": "zig",
+        "path": "./snippets/zig.json"
       }
     ]
   }

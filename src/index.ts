@@ -1,51 +1,45 @@
-import {
-  commands,
-  ExtensionContext,
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  services,
-  window,
-  workspace,
-} from 'coc.nvim';
+import { commands, ExtensionContext, window } from 'coc.nvim';
+import { Zls } from './zls';
 
 function registerCommand(command: string, impl: (...args: any[]) => void) {
   commands.registerCommand(`zls.${command}`, impl);
 }
 
-export async function activate(context: ExtensionContext): Promise<void> {
-  const config = workspace.getConfiguration('zls');
-  const serverPath = config.get<string>('serverPath', 'zls');
-  const debugLog = config.get<boolean>('debugLog', false);
+let zls: Zls | undefined;
 
-  if ((await workspace.nvim.call('executable', serverPath)) != 1) {
-    window.showErrorMessage(`The ${serverPath} is not executable`);
-    return;
+export async function activate(context: ExtensionContext) {
+  zls = new Zls(context);
+
+  registerCommand('install', async () => {
+    await zls?.install();
+  });
+
+  if (!zls.resolveBin()) {
+    const ok = await window.showPrompt('Install zls?');
+    if (ok) {
+      await zls.install();
+    } else {
+      window.showInformationMessage("You can set 'zls.path' or run command 'zls.install':)");
+      return;
+    }
   }
 
-  const serverOptions: ServerOptions = {
-    command: serverPath,
-    args: debugLog ? ['--debug-log'] : [],
-  };
+  await zls.startServer();
 
-  const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ scheme: 'file', language: 'zig' }],
-  };
-
-  const client = new LanguageClient('zls', 'Zig Language Server', serverOptions, clientOptions);
-  context.subscriptions.push(services.registLanguageClient(client));
-
-  // commands
-  registerCommand('start', () => {
-    if (client.needsStart()) client.start();
+  registerCommand('start', async () => {
+    await zls?.startServer();
   });
 
   registerCommand('stop', async () => {
-    if (client.needsStop()) await client.stop();
+    await zls?.stopClient();
   });
 
   registerCommand('restart', async () => {
-    if (client.needsStop()) await client.stop();
-    if (client.needsStart()) client.start();
+    await zls?.stopClient();
+    await zls?.startServer();
   });
+}
+
+export function deactivate() {
+  zls?.stopClient();
 }
