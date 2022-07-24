@@ -1,6 +1,6 @@
 {
   "name": "coc-zls",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "zls extension for coc.nvim",
   "author": "wongxy <xiyao.wong@foxmail.com>",
   "license": "MIT",
