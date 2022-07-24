@@ -11,7 +11,9 @@ export async function activate(context: ExtensionContext) {
   zls = new Zls(context);
 
   registerCommand('install', async () => {
+    await zls?.stopClient();
     await zls?.install();
+    await zls?.startServer();
   });
 
   if (!zls.resolveBin()) {
