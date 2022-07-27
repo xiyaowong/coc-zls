@@ -137,14 +137,18 @@ export class Zls {
   }
 
   async startServer() {
-    const client = this.client ?? this.createClient();
-    if (!client) return;
-    this.ctx.subscriptions.push(services.registLanguageClient(client));
-    await client.onReady();
-    this.client = client;
+    if (this.client) {
+      if (this.client.needsStart()) this.client.start();
+    } else {
+      const client = this.createClient();
+      if (!client) return;
+      this.ctx.subscriptions.push(services.registLanguageClient(client));
+      await client.onReady();
+      this.client = client;
+    }
   }
 
   async stopClient() {
-    await this.client?.stop();
+    if (this.client && this.client.needsStop()) await this.client.stop();
   }
 }

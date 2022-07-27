@@ -52,7 +52,7 @@
     "commands": [
       {
         "command": "zls.install",
-        "title": "Install Server",
+        "title": "Install or Update Server",
         "category": "Zig Language Server"
       },
       {
