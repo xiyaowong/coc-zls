@@ -24,6 +24,8 @@ enum InstallationName {
   x86_64_linux = 'x86_64-linux',
   x86_64_macos = 'x86_64-macos',
   x86_64_windows = 'x86_64-windows',
+  aarch64_linux = 'aarch64-linux',
+  aarch64_macos = 'aarch64-macos',
 }
 
 function getDefaultInstallationName(): InstallationName | null {
@@ -36,6 +38,9 @@ function getDefaultInstallationName(): InstallationName | null {
     if (plat === 'linux') return InstallationName.x86_64_linux;
     else if (plat === 'darwin') return InstallationName.x86_64_macos;
     else if (plat === 'win32') return InstallationName.x86_64_windows;
+  } else if (arch === 'arm64') {
+    if (plat === 'linux') return InstallationName.aarch64_linux;
+    else if (plat === 'darwin') return InstallationName.aarch64_macos;
   }
   return null;
 }
@@ -68,7 +73,7 @@ export class Zls {
     }
 
     const debugLog = this.cfg.get<boolean>('debugLog')!;
-    return [zlsPath, debugLog ? ['--debug-log'] : []];
+    return [zlsPath, debugLog ? ['--enable-debug-log'] : []];
   }
 
   async install() {
