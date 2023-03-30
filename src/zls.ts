@@ -11,10 +11,7 @@ import mkdirp from 'mkdirp';
 import * as child_process from 'child_process';
 import camelCase from 'camelcase';
 
-const headers = {
-  'User-Agent':
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.5060.114 Safari/537.36 Edg/103.0.1264.62',
-};
+const headers = { 'User-Agent': 'VSCode' };
 function getAgent() {
   return process.env.https_proxy ? new HttpsProxyAgent(process.env.https_proxy as string) : undefined;
 }
@@ -135,6 +132,7 @@ export async function startClient(context: ExtensionContext) {
         ? ['textDocument/formatting']
         : [],
     documentSelector: [{ scheme: 'file', language: 'zig' }],
+    progressOnInitialization: true,
     outputChannel,
     middleware: {
       workspace: {
