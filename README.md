@@ -1,29 +1,14 @@
 # coc-zls
 
-zls extension for coc.nvim
+[zls](https://github.com/zigtools/zls) extension for coc.nvim
 
 ## Install
 
 `:CocInstall coc-zls`
 
-## Settings
+## Usage
 
-Please trigger completion in coc-settings.json
-
-`zls.`
-
-## Commands
-
-- `zls.start`
-- `zls.stop`
-- `zls.restart`
-- `zls.Install`
-
-## Snippets
-
-Snippets are improved from [`Metalymph/zig-snippets`](https://github.com/Metalymph/zig-snippets)
-
-You need to install `coc-snippets`
+This extension is identical to [vscode-zig](https://github.com/ziglang/vscode-zig), please refer to the vscode-zig repository for usage instructions such as configuration, commands, etc.
 
 ## License
 

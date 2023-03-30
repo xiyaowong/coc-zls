@@ -45,37 +45,109 @@
     "rimraf": "^3.0.2",
     "typescript": "^4.1.2"
   },
+  "dependencies": {
+    "camelcase": "^7.0.1",
+    "lodash-es": "^4.17.21",
+    "which": "^3.0.0"
+  },
   "activationEvents": [
-    "onLanguage:zig"
+    "onLanguage:zig",
+    "workspaceContains:*/build.zig",
+    "workspaceContains:*/build.zig.zon"
   ],
   "contributes": {
-    "commands": [
-      {
-        "command": "zls.install",
-        "title": "Install or Update Server",
-        "category": "Zig Language Server"
-      },
-      {
-        "command": "zls.start",
-        "title": "Start Server",
-        "category": "Zig Language Server"
-      },
-      {
-        "command": "zls.stop",
-        "title": "Stop Server",
-        "category": "Zig Language Server"
-      },
-      {
-        "command": "zls.restart",
-        "title": "Restart Server",
-        "category": "Zig Language Server"
-      }
-    ],
     "configuration": {
       "type": "object",
-      "title": "Zig Language Server",
+      "title": "Zig",
       "properties": {
-        "zls.trace.server": {
+        "zig.buildOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Compiles code on file save using the settings specified in 'Build Option'."
+        },
+        "zig.buildOption": {
+          "type": "string",
+          "default": "build",
+          "enum": [
+            "build",
+            "build-exe",
+            "build-lib",
+            "build-obj"
+          ],
+          "description": "Which build command Zig should use to build the code."
+        },
+        "zig.buildArgs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Extra arguments to passed to Zig."
+        },
+        "zig.buildFilePath": {
+          "type": "string",
+          "default": "${workspaceFolder}/build.zig",
+          "description": "The path to build.zig. This is only required if zig.buildOptions = build."
+        },
+        "zig.zigPath": {
+          "type": "string",
+          "default": null,
+          "description": "Set a custom path to the Zig binary. Defaults to 'zig' in your PATH."
+        },
+        "zig.revealOutputChannelOnFormattingError": {
+          "type": "boolean",
+          "default": true,
+          "description": "Should output channel be raised on formatting error."
+        },
+        "zig.astCheckProvider": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Whether to enable ast-check diagnostics",
+          "enum": [
+            "off",
+            "extension",
+            "zls"
+          ],
+          "enumItemLabels": [
+            "Off",
+            "Extension",
+            "Zig Language Server"
+          ],
+          "enumDescriptions": [
+            "Disable ast-check diagnostics",
+            "Use extension ast-check diagnostics (fewer features)",
+            "Use ZLS ast-check diagnostics (includes code actions)"
+          ],
+          "default": "zls"
+        },
+        "zig.formattingProvider": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Whether to enable formatting (requires restarting editor)",
+          "enum": [
+            "off",
+            "extension",
+            "zls"
+          ],
+          "enumItemLabels": [
+            "Off",
+            "Extension",
+            "Zig Language Server"
+          ],
+          "enumDescriptions": [
+            "Disable formatting",
+            "Use extension formatting",
+            "Use ZLS formatting (not recommended as zls's formatting is slower)"
+          ],
+          "default": "extension"
+        },
+        "zig.zls.enabled": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to enable zls",
+          "default": true
+        },
+        "zig.trace.server": {
           "scope": "window",
           "type": "string",
           "enum": [
@@ -86,107 +158,205 @@
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
         },
-        "zls.path": {
+        "zig.zls.checkForUpdate": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to automatically check for new updates",
+          "default": true
+        },
+        "zig.zls.path": {
           "scope": "resource",
           "type": "string",
-          "description": "Path to `zls` executable. Example: `C:/zls/zig-cache/bin/zls.exe`.",
+          "description": "Path to `zls` executable. Example: `C:/zls/zig-cache/bin/zls.exe`. If ${workspaceFolder} is used, it will resolve to the first workspace folder.",
           "format": "path"
         },
-        "zls.debugLog": {
+        "zig.zls.debugLog": {
           "scope": "resource",
           "type": "boolean",
-          "description": "Enable debug logging in release builds of zls."
+          "description": "Enable debug logging in release builds of zig.zls."
         },
-        "zls.enable_snippets": {
+        "zig.zls.enableSnippets": {
           "scope": "resource",
           "type": "boolean",
-          "description": "Whether to enable snippet completions",
-          "default": false
-        },
-        "zls.enable_unused_variable_warnings": {
-          "scope": "resource",
-          "type": "boolean",
-          "description": "Whether to enable unused variable warnings",
-          "default": false
-        },
-        "zls.enable_import_embedfile_argument_completions": {
-          "scope": "resource",
-          "type": "boolean",
-          "description": "Whether to enable import/embedFile argument completions (NOTE: these are triggered manually as updating the autotrigger characters may cause issues)",
-          "default": false
-        },
-        "zls.zig_lib_path": {
-          "scope": "resource",
-          "type": "string",
-          "description": "Zig library path",
-          "default": null
-        },
-        "zls.zig_exe_path": {
-          "scope": "resource",
-          "type": "string",
-          "description": "Zig executable path used to run the custom build runner. May be used to find a lib path if none is provided.",
-          "default": null
-        },
-        "zls.warn_style": {
-          "scope": "resource",
-          "type": "boolean",
-          "description": "Whether to pay attention to style issues. This is opt-in since the style guide explicitly states that the style info provided is a guideline only.",
-          "default": false
-        },
-        "zls.build_runner_path": {
-          "scope": "resource",
-          "type": "string",
-          "description": "Path to the build_runner.zig file.",
-          "default": null
-        },
-        "zls.build_runner_cache_path": {
-          "scope": "resource",
-          "type": "string",
-          "description": "Path to a directory that will be used as cache when `zig run`ning the build runner",
-          "default": null
-        },
-        "zls.enable_semantic_tokens": {
-          "scope": "resource",
-          "type": "boolean",
-          "description": "Semantic token support",
+          "description": "Enables snippet completions when the client also supports them",
           "default": true
         },
-        "zls.operator_completions": {
+        "zig.zls.enableAutofix": {
           "scope": "resource",
           "type": "boolean",
-          "description": "Whether to enable `*` and `?` operators in completion lists",
+          "description": "Whether to automatically fix errors on save. Currently supports adding and removing discards.",
           "default": true
         },
-        "zls.include_at_in_builtins": {
+        "zig.zls.enableImportEmbedfileArgumentCompletions": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to enable import/embedFile argument completions",
+          "default": true
+        },
+        "zig.zls.semanticTokens": {
+          "scope": "resource",
+          "type": "string",
+          "enum": [
+            "none",
+            "partial",
+            "full"
+          ],
+          "description": "Set level of semantic tokens. Partial only includes information that requires semantic analysis.",
+          "default": "partial"
+        },
+        "zig.zls.enableInlayHints": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Enables inlay hint support when the client also supports it",
+          "default": true
+        },
+        "zig.zls.inlayHintsShowBuiltin": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Enable inlay hints for builtin functions",
+          "default": true
+        },
+        "zig.zls.inlayHintsExcludeSingleArgument": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Don't show inlay hints for single argument calls",
+          "default": true
+        },
+        "zig.zls.inlayHintsHideRedundantParamNames": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Hides inlay hints when parameter name matches the identifier (e.g. foo: foo)",
+          "default": false
+        },
+        "zig.zls.inlayHintsHideRedundantParamNamesLastToken": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Hides inlay hints when parameter name matches the last token of a parameter node (e.g. foo: bar.foo, foo: &foo)",
+          "default": false
+        },
+        "zig.zls.operatorCompletions": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Enables `*` and `?` operators in completion lists",
+          "default": true
+        },
+        "zig.zls.warnStyle": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Enables warnings for style guideline mismatches",
+          "default": false
+        },
+        "zig.zls.highlightGlobalVarDeclarations": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to highlight global var declarations",
+          "default": false
+        },
+        "zig.zls.useComptimeInterpreter": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "Whether to use the comptime interpreter",
+          "default": false
+        },
+        "zig.zls.includeAtInBuiltins": {
           "scope": "resource",
           "type": "boolean",
           "description": "Whether the @ sign should be part of the completion of builtins",
           "default": false
         },
-        "zls.max_detail_length": {
-          "scope": "resource",
-          "type": "integer",
-          "description": "The detail field of completions is truncated to be no longer than this (in bytes).",
-          "default": 1048576
-        },
-        "zls.skip_std_references": {
+        "zig.zls.skipStdReferences": {
           "scope": "resource",
           "type": "boolean",
-          "description": "Skips references to std. This will improve lookup speeds. Going to definition however will continue to work",
+          "description": "When true, skips searching for references in std. Improves lookup speed for functions in user's code. Renaming and go-to-definition will continue to work as is",
           "default": false
         },
-        "zls.builtin_path": {
+        "zig.zls.maxDetailLength": {
+          "scope": "resource",
+          "type": "integer",
+          "description": "The detail field of completions is truncated to be no longer than this (in bytes)",
+          "default": 1048576
+        },
+        "zig.zls.recordSession": {
+          "scope": "resource",
+          "type": "boolean",
+          "description": "When true, zls will record all request is receives and write in into `record_session_path`, so that they can replayed with `zls replay`",
+          "default": false
+        },
+        "zig.zls.recordSessionPath": {
           "scope": "resource",
           "type": "string",
-          "description": "Path to \"builtin;\" useful for debugging, automatically set if let null",
-          "default": null
+          "description": "Output file path when `record_session` is set. The recommended file extension *.zlsreplay",
+          "format": "path"
+        },
+        "zig.zls.replaySessionPath": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Used when calling `zls replay` for specifying the replay file. If no extra argument is given `record_session_path` is used as the default path.",
+          "format": "path"
+        },
+        "zig.zls.builtinPath": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to 'builtin;' useful for debugging, automatically set if let null",
+          "format": "path"
+        },
+        "zig.zls.zigLibPath": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Zig library path, e.g. `/path/to/zig/lib/zig`, used to analyze std library imports",
+          "format": "path"
+        },
+        "zig.zls.buildRunnerPath": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to the `build_runner.zig` file provided by zls. null is equivalent to `${executable_directory}/build_runner.zig`",
+          "format": "path"
+        },
+        "zig.zls.globalCachePath": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to a directory that will be used as zig's cache. null is equivalent to `${KnownFloders.Cache}/zls`",
+          "format": "path"
+        },
+        "zig.zls.buildRunnerGlobalCachePath": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Path to a directory that will be used as the global cache path when executing a projects build.zig. null is equivalent to the path shown by `zig env`",
+          "format": "path"
         }
       }
     },
-    "snippets": [
+    "commands": [
       {
-        "language": "zig",
-        "path": "./snippets/zig.json"
+        "command": "zig.build.workspace",
+        "title": "Build Workspace",
+        "category": "Zig",
+        "description": "Build the current project using 'zig build'"
+      },
+      {
+        "command": "zig.zls.install",
+        "title": "Install Server",
+        "category": "Zig Language Server"
+      },
+      {
+        "command": "zig.zls.startRestart",
+        "title": "Start / Restart Server",
+        "category": "Zig Language Server"
+      },
+      {
+        "command": "zig.zls.stop",
+        "title": "Stop Server",
+        "category": "Zig Language Server"
+      },
+      {
+        "command": "zig.zls.openconfig",
+        "title": "Open ZLS Config",
+        "category": "Zig Language Server"
+      },
+      {
+        "command": "zig.zls.update",
+        "title": "Check for Server Updates",
+        "category": "Zig Language Server"
       }
     ]
   }
