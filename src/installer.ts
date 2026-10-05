@@ -24,6 +24,8 @@ const REQUEST_HEADERS = {
 }
 const REQUEST_TIMEOUT = 30_000
 const DOWNLOAD_TIMEOUT = 300_000
+const UPDATE_CHECK_INTERVAL = 24 * 60 * 60 * 1000
+const UPDATE_CHECK_STAMP = '.update-check'
 
 /** Maps the running machine to a zls prebuilt-binary target, `undefined` when none is published. */
 const TARGETS: Record<string, string> = {
@@ -129,6 +131,13 @@ const checkForUpdate = async (storageDirectory: string, current: number[]): Prom
     return
   }
   updateChecked = true
+
+  const stampPath = path.join(storageDirectory, UPDATE_CHECK_STAMP)
+  const lastChecked = Number(await fs.promises.readFile(stampPath, 'utf8').catch(() => '')) || 0
+  if (Date.now() - lastChecked < UPDATE_CHECK_INTERVAL) {
+    return
+  }
+  await fs.promises.writeFile(stampPath, String(Date.now()), 'utf8').catch(() => undefined)
 
   let latest: number[] | undefined
   try {
