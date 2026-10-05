@@ -4,6 +4,6 @@ tsconfig.json
 *.map
 .tags
 .DS_Store
-eslint.config.mjs
-tsdown.config.mts
+eslint.config.ts
+tsdown.config.ts
 pnpm-lock.yaml

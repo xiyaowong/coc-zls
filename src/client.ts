@@ -1,18 +1,45 @@
 import * as coc from 'coc.nvim'
+import { getConfiguration, getOptionalString } from './util'
 
 export const CLIENT_ID = 'zls'
 
 const DOCUMENT_SELECTOR: coc.DocumentSelector = ['zig']
 
-export const createZlsClient = (command: string): coc.LanguageClient =>
-  new coc.LanguageClient(
+const serverArguments = (): string[] => {
+  const config = getConfiguration()
+  const args: string[] = []
+
+  const logFile = getOptionalString('logFile')
+  if (logFile) {
+    args.push('--log-file', logFile)
+  }
+
+  const logLevel = config.get<string>('logLevel', 'info')
+  if (logLevel !== 'info') {
+    args.push('--log-level', logLevel)
+  }
+
+  if (config.get<boolean>('disableLspLogs', false)) {
+    args.push('--disable-lsp-logs')
+  }
+
+  return args
+}
+
+export const createZlsClient = (command: string): coc.LanguageClient => {
+  const clientOptions: coc.LanguageClientOptions = {
+    documentSelector: DOCUMENT_SELECTOR,
+    outputChannelName: 'zls',
+    formatterPriority: 999,
+  }
+  if (!getConfiguration().get<boolean>('format.enable', true)) {
+    clientOptions.disabledFeatures = ['documentFormatting', 'documentRangeFormatting', 'documentOnTypeFormatting']
+  }
+
+  return new coc.LanguageClient(
     CLIENT_ID,
     'Zig Language Server',
-    { command, args: [] },
-    {
-      documentSelector: DOCUMENT_SELECTOR,
-      outputChannelName: 'zls',
-      // zls owns Zig formatting: let it win over any editor-side formatter so coc applies its edits.
-      formatterPriority: 999,
-    },
+    { command, args: serverArguments() },
+    clientOptions,
   )
+}

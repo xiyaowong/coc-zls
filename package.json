@@ -1,6 +1,6 @@
 {
   "name": "coc-zls",
-  "type": "commonjs",
+  "type": "module",
   "version": "0.0.7",
   "description": "Zig Language Server (zls) extension for coc.nvim.",
   "author": "wongxy <xiyao.wong@foxmail.com>",
@@ -15,7 +15,7 @@
   "main": "lib/index.js",
   "engines": {
     "coc": "^0.0.80",
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "activationEvents": [
     "onLanguage:zig"
@@ -36,6 +36,35 @@
           "type": "boolean",
           "default": true,
           "description": "Whether to check for a newer zls release after startup."
+        },
+        "zls.logFile": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Path to the zls log file. Passed to the language server as --log-file."
+        },
+        "zls.logLevel": {
+          "type": "string",
+          "enum": [
+            "err",
+            "warn",
+            "info",
+            "debug"
+          ],
+          "default": "info",
+          "description": "The log level used by zls. Passed to the language server as --log-level."
+        },
+        "zls.disableLspLogs": {
+          "type": "boolean",
+          "default": false,
+          "description": "Disable zls's LSP window/logMessage messages. Passed to the language server as --disable-lsp-logs."
+        },
+        "zls.format.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether zls provides Zig formatting. When false, coc will not use zls as a formatter."
         }
       }
     },
@@ -43,6 +72,16 @@
       {
         "command": "zls.reinstall",
         "title": "Reinstall zls",
+        "category": "Zig Language Server"
+      },
+      {
+        "command": "zls.restart",
+        "title": "Restart zls",
+        "category": "Zig Language Server"
+      },
+      {
+        "command": "zls.stop",
+        "title": "Stop zls",
         "category": "Zig Language Server"
       }
     ]

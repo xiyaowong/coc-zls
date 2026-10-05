@@ -41,6 +41,12 @@ export async function activate(context: coc.ExtensionContext): Promise<void> {
         await startClient(context.storagePath)
       }
     }),
+    coc.commands.registerCommand('zls.restart', async () => {
+      await startClient(context.storagePath)
+    }),
+    coc.commands.registerCommand('zls.stop', async () => {
+      await stopClient()
+    }),
     coc.workspace.onDidChangeConfiguration(async (change) => {
       if (change.affectsConfiguration('zls')) {
         await startClient(context.storagePath)
