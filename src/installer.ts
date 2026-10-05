@@ -122,10 +122,13 @@ const promptForUpdate = async (storageDirectory: string): Promise<void> => {
   }
 }
 
+let updateChecked = false
+
 const checkForUpdate = async (storageDirectory: string, current: number[]): Promise<void> => {
-  if (!getConfiguration().get<boolean>('checkUpdate', true)) {
+  if (updateChecked || !getConfiguration().get<boolean>('checkUpdate', true)) {
     return
   }
+  updateChecked = true
 
   let latest: number[] | undefined
   try {

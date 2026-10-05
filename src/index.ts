@@ -2,6 +2,14 @@ import * as coc from 'coc.nvim'
 import { CLIENT_ID, createZlsClient, setActiveClient, stopClient } from './client'
 import { ensureZlsExists, reinstallZls } from './installer'
 
+const RESTART_CONFIGURATION_KEYS = [
+  'zls.path',
+  'zls.logFile',
+  'zls.logLevel',
+  'zls.disableLspLogs',
+  'zls.format.enable',
+]
+
 const startClient = async (storagePath: string): Promise<void> => {
   await stopClient()
 
@@ -32,7 +40,7 @@ export async function activate(context: coc.ExtensionContext): Promise<void> {
       await stopClient()
     }),
     coc.workspace.onDidChangeConfiguration(async (change) => {
-      if (change.affectsConfiguration('zls')) {
+      if (RESTART_CONFIGURATION_KEYS.some(key => change.affectsConfiguration(key))) {
         await startClient(context.storagePath)
       }
     }),
