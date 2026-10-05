@@ -35,7 +35,7 @@
         "zls.checkUpdate": {
           "type": "boolean",
           "default": true,
-          "description": "Whether to check for a newer zls release after startup."
+          "description": "Whether to check for a newer zls release. Checks run at most once a day."
         },
         "zls.logFile": {
           "type": [
