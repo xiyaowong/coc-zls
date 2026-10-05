@@ -43,3 +43,24 @@ export const createZlsClient = (command: string): coc.LanguageClient => {
     clientOptions,
   )
 }
+
+let activeClient: coc.LanguageClient | undefined
+let activeRegistration: coc.Disposable | undefined
+
+export const setActiveClient = (client: coc.LanguageClient, registration: coc.Disposable): void => {
+  activeClient = client
+  activeRegistration = registration
+}
+
+export const stopClient = async (): Promise<void> => {
+  const client = activeClient
+  const registration = activeRegistration
+  activeClient = undefined
+  activeRegistration = undefined
+
+  // `services.registerLanguageClient` disposes the client, which stops the server.
+  registration?.dispose()
+  if (client?.needsStop()) {
+    await client.stop().catch(() => undefined)
+  }
+}

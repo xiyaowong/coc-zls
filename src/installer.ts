@@ -3,7 +3,7 @@ import * as os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 import * as coc from 'coc.nvim'
-import { stopClient } from './index'
+import { stopClient } from './client'
 import {
   ensureDirectory,
   errorMessage,

@@ -1,22 +1,6 @@
 import * as coc from 'coc.nvim'
-import { CLIENT_ID, createZlsClient } from './client'
+import { CLIENT_ID, createZlsClient, setActiveClient, stopClient } from './client'
 import { ensureZlsExists, reinstallZls } from './installer'
-
-let client: coc.LanguageClient | undefined
-let registration: coc.Disposable | undefined
-
-export const stopClient = async (): Promise<void> => {
-  const current = client
-  const currentRegistration = registration
-  client = undefined
-  registration = undefined
-
-  // `services.registerLanguageClient` disposes the client, which stops the server.
-  currentRegistration?.dispose()
-  if (current?.needsStop()) {
-    await current.stop().catch(() => undefined)
-  }
-}
 
 const startClient = async (storagePath: string): Promise<void> => {
   await stopClient()
@@ -26,8 +10,8 @@ const startClient = async (storagePath: string): Promise<void> => {
     return
   }
 
-  client = createZlsClient(command)
-  registration = coc.services.registerLanguageClient(client)
+  const client = createZlsClient(command)
+  setActiveClient(client, coc.services.registerLanguageClient(client))
   // Registered services start lazily when a matching document is opened, which already happened
   // before this extension activates, so start it explicitly.
   await coc.services.getService(CLIENT_ID)?.start()
