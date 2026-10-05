@@ -25,5 +25,10 @@ export const getOptionalString = (key: string): string | undefined => {
   return trimmed || undefined
 }
 
+export const parseVersion = (value: string): number[] | undefined => {
+  const match = /(\d+)\.(\d+)\.(\d+)/.exec(value)
+  return match ? [+match[1], +match[2], +match[3]] : undefined
+}
+
 export const errorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error)

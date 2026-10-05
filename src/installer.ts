@@ -11,6 +11,7 @@ import {
   fileExists,
   getConfiguration,
   getOptionalString,
+  parseVersion,
 } from './util'
 import { getZlsVersion } from './zls'
 
@@ -24,23 +25,18 @@ const REQUEST_HEADERS = {
 const REQUEST_TIMEOUT = 30_000
 const DOWNLOAD_TIMEOUT = 300_000
 
-const TARGETS = new Set([
-  'x86-linux',
-  'x86-windows',
-  'x86_64-linux',
-  'x86_64-macos',
-  'x86_64-windows',
-  'aarch64-macos',
-  'aarch64-linux',
-])
-
 /** Maps the running machine to a zls prebuilt-binary target, `undefined` when none is published. */
-const downloadTarget = (): string | undefined => {
-  const width = process.arch === 'arm64' ? 'aarch64' : process.arch === 'x64' ? 'x86_64' : process.arch === 'ia32' ? 'x86' : ''
-  const suffix = os.platform() === 'win32' ? 'windows' : os.platform() === 'linux' ? 'linux' : os.platform() === 'darwin' ? 'macos' : ''
-  const target = `${width}-${suffix}`
-  return TARGETS.has(target) ? target : undefined
+const TARGETS: Record<string, string> = {
+  'linux-x64': 'x86_64-linux',
+  'linux-ia32': 'x86-linux',
+  'linux-arm64': 'aarch64-linux',
+  'darwin-x64': 'x86_64-macos',
+  'darwin-arm64': 'aarch64-macos',
+  'win32-x64': 'x86_64-windows',
+  'win32-ia32': 'x86-windows',
 }
+
+const downloadTarget = (): string | undefined => TARGETS[`${os.platform()}-${process.arch}`]
 
 const installZls = async (storageDirectory: string): Promise<string> =>
   coc.window.withProgress({ title: 'Installing zls', cancellable: true }, async (progress, token) => {
@@ -92,11 +88,6 @@ export const reinstallZls = async (storageDirectory: string): Promise<string | u
   }
 }
 
-const parseVersion = (value: string): number[] | undefined => {
-  const match = /(\d+)\.(\d+)\.(\d+)/.exec(value)
-  return match ? [+match[1], +match[2], +match[3]] : undefined
-}
-
 const isNewer = (older: number[], newer: number[]): boolean => {
   for (let index = 0; index < 3; index++) {
     if (older[index] !== newer[index]) {
@@ -131,13 +122,8 @@ const promptForUpdate = async (storageDirectory: string): Promise<void> => {
   }
 }
 
-const checkForUpdate = async (storageDirectory: string, currentVersion: string): Promise<void> => {
+const checkForUpdate = async (storageDirectory: string, current: number[]): Promise<void> => {
   if (!getConfiguration().get<boolean>('checkUpdate', true)) {
-    return
-  }
-
-  const current = parseVersion(currentVersion)
-  if (!current) {
     return
   }
 

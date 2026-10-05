@@ -1,26 +1,29 @@
-import { Buffer } from 'node:buffer'
 import { spawn } from 'node:child_process'
+import { parseVersion } from './util'
 
 const run = (command: string, args: string[]): Promise<string> =>
   new Promise((resolve, reject) => {
     const child = spawn(command, args, { windowsHide: true })
-    const stdout: Buffer[] = []
-    const stderr: Buffer[] = []
+    let stdout = ''
+    let stderr = ''
 
-    child.stdout.on('data', (chunk: Buffer) => stdout.push(chunk))
-    child.stderr.on('data', (chunk: Buffer) => stderr.push(chunk))
+    child.stdout.setEncoding('utf8').on('data', (chunk: string) => {
+      stdout += chunk
+    })
+    child.stderr.setEncoding('utf8').on('data', (chunk: string) => {
+      stderr += chunk
+    })
 
     child.on('error', (error) => {
       reject(new Error(`Failed to run ${command}: ${error.message}`))
     })
 
     child.on('close', (code) => {
-      const output = Buffer.concat(stdout).toString('utf8')
       if (code === 0) {
-        resolve(output)
+        resolve(stdout)
         return
       }
-      const error = Buffer.concat(stderr).toString('utf8').trim()
+      const error = stderr.trim()
       reject(new Error(`${command} exited with code ${code}${error ? `: ${error}` : ''}`))
     })
 
@@ -29,10 +32,9 @@ const run = (command: string, args: string[]): Promise<string> =>
     child.stdin.end()
   })
 
-export const getZlsVersion = async (command: string): Promise<string | undefined> => {
+export const getZlsVersion = async (command: string): Promise<number[] | undefined> => {
   try {
-    const output = await run(command, ['--version'])
-    return output.match(/(\d+\.\d+\.[\w.+-]*)/)?.[1]
+    return parseVersion(await run(command, ['--version']))
   } catch {
     return undefined
   }
