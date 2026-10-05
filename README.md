@@ -4,26 +4,27 @@
 
 Completions, hover, go-to-definition, diagnostics and formatting for Zig code. When no binary is configured, a prebuilt zls is downloaded on first use.
 
-## Requirements
+## 📋 Requirements
 
 - [coc.nvim](https://github.com/neoclide/coc.nvim) 0.0.80 or newer
 - [zig.vim](https://github.com/ziglang/zig.vim), for `.zig` filetype detection and syntax highlighting
 
-## Install
+## 📦 Install
 
 ```vim
 :CocInstall coc-zls
 ```
 
-## Usage
+## 💻 Usage
 
-zls starts automatically when a Zig file is opened.
+- zls starts automatically when a Zig file is opened.
+- Completions, hover, go-to-definition and diagnostics come from zls.
+- Format Zig code with coc's format action, or add `"zig"` to `coc.preferences.formatOnSaveFiletypes` to format on save.
+- If `zls.path` is unset and no binary is installed yet, a prebuilt zls is downloaded and kept in the extension's storage directory.
 
-Formatting is handled by zls: run coc's format action, or add `"zig"` to `coc.preferences.formatOnSaveFiletypes` to format on save.
+> Prebuilt binaries are published for x86_64/aarch64/x86 Linux, x86_64/aarch64 macOS and x86_64/x86 Windows. On any other platform, set `zls.path` to a zls you built yourself.
 
-When `zls.path` is unset and no binary is installed yet, a prebuilt zls is downloaded for the current platform and kept in the extension's storage directory. Prebuilt binaries are published for x86_64/aarch64/x86 Linux, x86_64/aarch64 macOS and x86_64/x86 Windows; on any other platform, set `zls.path` to a zls you built yourself.
-
-## Settings
+## ⚙️ Settings
 
 Set these in `coc-settings.json` (`:CocConfig`).
 
@@ -36,34 +37,31 @@ Set these in `coc-settings.json` (`:CocConfig`).
 | `zls.disableLspLogs` | `false` | Disable zls's LSP `window/logMessage` output. Passed as `--disable-lsp-logs`. |
 | `zls.format.enable` | `true` | Let zls provide Zig formatting. When `false`, coc does not use zls as a formatter. |
 
-## Commands
+## ⌨️ Commands
 
-- `:CocCommand zls.reinstall` — install zls again.
-- `:CocCommand zls.restart` — restart the language server.
-- `:CocCommand zls.stop` — stop the language server; `zls.restart` starts it again.
+| Command | Description |
+| --- | --- |
+| `:CocCommand zls.reinstall` | Install zls again. |
+| `:CocCommand zls.restart` | Restart the language server. |
+| `:CocCommand zls.stop` | Stop the language server; `zls.restart` starts it again. |
 
-## Code actions on save
+## 💾 Code actions on save
 
-Run zls code actions on save with coc's `BufWritePre` autocmds.
+Run zls code actions on save with coc's `BufWritePre` autocmd.
 
-`source.fixAll` — Neovim (`init.lua`):
+| Action | CocAction |
+| --- | --- |
+| `source.fixAll` | `fixAll` |
+| `source.organizeImports` | `organizeImport` |
+
+Neovim (`init.lua`):
 
 ```lua
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = { "*.zig", "*.zon" },
   command = "call CocActionAsync('fixAll')"
 })
-```
 
-Vim (`init.vim` / `.vimrc`):
-
-```vim
-autocmd BufWritePre *.zig,*.zon call CocActionAsync('fixAll')
-```
-
-`source.organizeImports` — Neovim (`init.lua`):
-
-```lua
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = { "*.zig", "*.zon" },
   command = "call CocActionAsync('organizeImport')"
@@ -73,9 +71,10 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 Vim (`init.vim` / `.vimrc`):
 
 ```vim
+autocmd BufWritePre *.zig,*.zon call CocActionAsync('fixAll')
 autocmd BufWritePre *.zig,*.zon call CocActionAsync('organizeImport')
 ```
 
-## License
+## 📄 License
 
 MIT
